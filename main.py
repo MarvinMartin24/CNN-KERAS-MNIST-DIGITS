@@ -2,6 +2,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
 from keras.optimizers import Adadelta, SGD, Adam
 from keras.models import model_from_json
+from keras.utils import plot_model
 from keras.datasets import mnist
 
 
@@ -100,11 +101,13 @@ def use_model(img):
     model = read_model("model")
     input = np.array([readImageFromFile(img)])
     output = model.predict(input)[0]
+    plot_model(model, to_file='model/model.png')
     print(stepFunction(output))
     print("Predicted number is " +  str(np.argmax(output)) + '\n')
 
 if __name__ == '__main__':
     #build_model()
+
     for filename in glob.glob('image/*.png'):
         print("This image is a " + filename.split('.')[0][-1])
         use_model(filename)
