@@ -1,5 +1,12 @@
 # Convolutional Neural Network - MNIST Digits dataset
-Python 3 and Keras
+## Requirements
+Quite a lot of libraries are required.
+    * keras / tensorflow
+    * numpy
+    * PIL
+    * cv2
+    * ...
+Google them to install them depending on your OS
 
 ## RUN
 Go to your file directory, and run this command :
@@ -21,7 +28,7 @@ uncomment the function ```build_model()```
 
 ## Hyperparameters
 
-loss='categorical_crossentropy'
-optimizer=Adadelta()
-batch_size=200
-epochs=2
+    * loss = categorical_crossentropy
+    * optimizer = Adadelta
+    * batch_size=200
+    * epochs = 2
