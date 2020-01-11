@@ -1,12 +1,13 @@
 # Convolutional Neural Network - MNIST Digits dataset
 ## Requirements
-Quite a lot of libraries are required.
+Quite a lot of libraries are required
+Google them to install them depending on your OS
+
     * keras / tensorflow
     * numpy
     * PIL
     * cv2
     * ...
-Google them to install them depending on your OS
 
 ## RUN
 Go to your file directory, and run this command :
