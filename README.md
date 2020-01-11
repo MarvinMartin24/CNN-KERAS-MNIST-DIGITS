@@ -32,3 +32,18 @@ uncomment the function ```build_model()```
 * optimizer = Adadelta
 * batch_size=200
 * epochs = 2
+
+## Results
+```bash
+This image is a 2
+[0. 0. 1. 0. 0. 0. 0. 0. 0. 0.]
+Predicted number is 2
+
+This image is a 6
+[0. 0. 0. 0. 0. 0. 1. 0. 0. 0.]
+Predicted number is 6
+
+This image is a 8
+[0. 0. 0. 0. 0. 0. 0. 0. 1. 0.]
+Predicted number is 8
+```
