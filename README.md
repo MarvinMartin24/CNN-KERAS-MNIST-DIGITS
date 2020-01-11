@@ -10,9 +10,9 @@ By default it just apply the model, if you want to train it again
 uncomment the function ```build_model()```
 
 ## Data
-Load for MNIST
-Data volume : 60000
-Input shape is 28x28x1 (Gray Scale Image)
+-Load for MNIST
+-Data volume : 60000
+-Input shape is 28x28x1 (Gray Scale Image)
 
 ## Architecture
 ![alt text](model/model.png "Model")
