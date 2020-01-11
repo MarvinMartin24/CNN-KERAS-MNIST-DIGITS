@@ -3,13 +3,15 @@ from keras.layers import Dense, Conv2D, Dropout, Flatten, MaxPooling2D
 from keras.optimizers import Adadelta, SGD, Adam
 from keras.models import model_from_json
 from keras.datasets import mnist
-from keras import backend as K
+
 
 from tensorflow.python.tools import freeze_graph, optimize_for_inference_lib
 import tensorflow as tf
 
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
+import glob
 import cv2
 import os
 
@@ -39,42 +41,22 @@ def read_model(network_path):
     model.load_weights(os.path.join(network_path, 'weights.h5'))
     return model
 
-def export_model_for_mobile(model_name, input_node_name, output_node_name):
-    tf.train.write_graph(K.get_session().graph_def, 'out', \
-        model_name + '_graph.pbtxt')
-
-    tf.train.Saver().save(K.get_session(), 'out/' + model_name + '.chkp')
-
-    freeze_graph.freeze_graph('out/' + model_name + '_graph.pbtxt', None, \
-        False, 'out/' + model_name + '.chkp', output_node_name, \
-        "save/restore_all", "save/Const:0", \
-        'out/frozen_' + model_name + '.pb', True, "")
-
-    input_graph_def = tf.GraphDef()
-    with tf.gfile.Open('out/frozen_' + model_name + '.pb', "rb") as f:
-        input_graph_def.ParseFromString(f.read())
-
-    output_graph_def = optimize_for_inference_lib.optimize_for_inference(
-            input_graph_def, [input_node_name], [output_node_name],
-            tf.float32.as_datatype_enum)
-
-    with tf.gfile.FastGFile('out/tensorflow_lite_' + model_name + '.pb', "wb") as f:
-        f.write(output_graph_def.SerializeToString())
-
 def plot_history(history):
-    plt.title('model loss/accuracy')
-    plt.ylabel('loss/accuracy')
+    # summarize history for accuracy
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
     plt.xlabel('epoch')
-
-    #  Accuracy
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
-
-    # Loss
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+    # summarize history for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
-
-    plt.legend(['train loss', 'validation loss', 'train acc', 'validation acc'], loc='upper right')
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
     plt.show()
 
 def readImageFromFile(filepath):
@@ -88,38 +70,41 @@ def readImageFromFile(filepath):
     img = img/255.0
     img = img.reshape(28, 28, 1)
     return img
-'''
-#Load training data
-(X_train, Y_train), (X_test, Y_test) = loadTraining()
 
-# Build model
-model = Sequential()
-model.add(Conv2D(filters=64, kernel_size=3, strides=1, padding='same', activation='relu', input_shape=[28, 28, 1]))
-model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-model.add(Conv2D(filters=128, kernel_size=3, strides=1, padding='same', activation='relu'))
-model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-model.add(Conv2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu'))
-model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
-model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
-model.add(Dense(10, activation='softmax'))
+def build_model():
+    #Load training data
+    (X_train, Y_train), (X_test, Y_test) = loadTraining()
 
-# Train model and plot result
-model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
-history = model.fit(X_train, Y_train, batch_size=200, epochs=1, validation_data=(X_test, Y_test))
-plot_history(history)
+    # Build model
+    model = Sequential()
+    model.add(Conv2D(filters=64, kernel_size=3, strides=1, padding='same', activation='relu', input_shape=[28, 28, 1]))
+    model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+    model.add(Conv2D(filters=128, kernel_size=3, strides=1, padding='same', activation='relu'))
+    model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+    model.add(Conv2D(filters=256, kernel_size=3, strides=1, padding='same', activation='relu'))
+    model.add(MaxPooling2D(pool_size=2, strides=2, padding='same'))
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(10, activation='softmax'))
 
-# Save model
-save_model(model, "model")
+    # Train model and plot result
+    model.compile(loss='categorical_crossentropy', optimizer=Adadelta(), metrics=['accuracy'])
+    history = model.fit(X_train, Y_train, batch_size=200, epochs=2, validation_data=(X_test, Y_test))
+    plot_history(history)
 
-# Export model for tensorflow lite
-export_model_for_mobile("convnet", "conv2d_1_input", "dense_2/Softmax")
-'''
+    # Save model
+    save_model(model, "model")
 
-#Read model
-model = read_model("model")
-input = np.array([readImageFromFile("image/image.png")])
-output = model.predict(input)[0]
-print(np.around(output, decimals=1))
-print(stepFunction(output))
-print("Number is", np.argmax(output))
+def use_model(img):
+    #Read model
+    model = read_model("model")
+    input = np.array([readImageFromFile(img)])
+    output = model.predict(input)[0]
+    print(stepFunction(output))
+    print("Predicted number is " +  str(np.argmax(output)) + '\n')
+
+if __name__ == '__main__':
+    #build_model()
+    for filename in glob.glob('image/*.png'):
+        print("This image is a " + filename.split('.')[0][-1])
+        use_model(filename)
